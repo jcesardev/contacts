@@ -19,22 +19,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.albo.directory.models.User;
-import com.albo.directory.repos.UserJpaRepository;
+import com.albo.directory.repos.UserRepository;
 
 @RestController
 @RequestMapping("/usr")
 public class UserController {
 	
 	@Autowired
-	private UserJpaRepository userJpaRepository;
+	private UserRepository userRepository;
 
 	@GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<List<User>> findAll(@RequestParam(required = false, name = "startLetter") String startsWith) {
 	    List<User> users = null;
 	    if(startsWith != null) {
-	        users = userJpaRepository.findByNameStartingWithIgnoreCase(startsWith);	        
+	        users = userRepository.findByNameStartingWithIgnoreCase(startsWith);	        
 	    }else {
-	        users = userJpaRepository.findAll();
+	        users = userRepository.findAll();
 	    }	    
 	    if(!users.isEmpty()) {
 	        return ResponseEntity.ok(users);
@@ -45,17 +45,17 @@ public class UserController {
 	@PostMapping(consumes= {MediaType.APPLICATION_JSON_VALUE}, 
 	        produces = {MediaType.APPLICATION_JSON_VALUE})
 	public User create(@Valid @RequestBody User user) {
-		return userJpaRepository.save(user);
+		return userRepository.save(user);
 	}
 	
 	@PutMapping(path = "/{userId}", 
 	        consumes= {MediaType.APPLICATION_JSON_VALUE}, 
 	        produces = {MediaType.APPLICATION_JSON_VALUE} )
 	public ResponseEntity<User> update(@PathVariable(name="userId")Long userId, @RequestBody User user) {
-	    Optional<User> userFromDb = userJpaRepository.findById(userId);
+	    Optional<User> userFromDb = userRepository.findById(userId);
 	    if(userFromDb.isPresent()) {
 	        user.setId(userFromDb.get().getId());
-	        userJpaRepository.saveAndFlush(user);
+	        userRepository.saveAndFlush(user);
 	        return ResponseEntity.ok(user);
 	    }
 	    return ResponseEntity.notFound().build();
@@ -64,7 +64,7 @@ public class UserController {
 	@GetMapping(path = "/{userId}", 
 	        produces = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<User> getUserDetail(@PathVariable(name="userId") Long userId) {
-	    Optional<User> user = userJpaRepository.findById(userId);
+	    Optional<User> user = userRepository.findById(userId);
 	    if(user.isPresent()) {
 	        return ResponseEntity.ok(user.get());
 	    }
@@ -73,7 +73,7 @@ public class UserController {
 	
 	@DeleteMapping(path = "/{userId}")
 	public ResponseEntity<Object> delete(@PathVariable(name = "userId") Long userId) {	    
-        userJpaRepository.deleteById(userId);
+        userRepository.deleteById(userId);
         return ResponseEntity.noContent().build();
         
 	}
