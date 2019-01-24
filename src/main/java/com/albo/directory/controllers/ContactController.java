@@ -20,7 +20,10 @@ import com.albo.directory.models.User;
 import com.albo.directory.repos.ContactRepository;
 import com.albo.directory.repos.UserRepository;
 
+import io.swagger.annotations.Api;
+
 @RestController
+@Api(produces = "application/json", tags = {"Contact"}, description= "User's contact management")
 public class ContactController {
 
     @Autowired

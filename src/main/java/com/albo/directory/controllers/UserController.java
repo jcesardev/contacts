@@ -21,8 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.albo.directory.models.User;
 import com.albo.directory.repos.UserRepository;
 
+import io.swagger.annotations.Api;
+
 @RestController
 @RequestMapping("/usr")
+@Api(value = "/usr", produces = "application/json", tags = {"User"}, description= "User management")
 public class UserController {
 	
 	@Autowired
