@@ -2,15 +2,18 @@ package com.albo.directory.controllers;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +26,7 @@ import com.albo.directory.repos.UserRepository;
 import io.swagger.annotations.Api;
 
 @RestController
-@Api(produces = "application/json", tags = {"Contact"}, description= "User's contact management")
+@Api(produces = "application/json", tags = { "Contact" }, description = "User's contact management")
 public class ContactController {
 
     @Autowired
@@ -35,30 +38,65 @@ public class ContactController {
     @PostMapping(path = "/usr/{userId}/receipt", consumes = { MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<Contact> save(@PathVariable(name = "userId") Long userId, @Valid @RequestBody Contact contact) {
-        Optional<User> user = userRepository.findById(userId);        
-        if (user.isPresent()) {            
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isPresent()) {
             Contact contactFromDb = contactRepopsitory.findByPhoneNumber(contact.getPhoneNumber());
-            if(contactFromDb == null) {
+            if (contactFromDb == null) {
                 contactFromDb = contactRepopsitory.save(contact);
             }
             user.get().getContacts().add(contactFromDb);
             userRepository.saveAndFlush(user.get());
             return ResponseEntity.ok(contactFromDb);
-        }        
+        }
         return ResponseEntity.badRequest().build();
     }
 
-    @GetMapping(path = "/usr/{userId}/receipt/{contactId}")
-    public ResponseEntity<Contact> getContactDetail(@PathVariable(name = "userId") Long userId,
-            @PathVariable(name = "contactId") Long contactId) {
+    @PutMapping(path = "/usr/{userId}/receipt/{contactId}", consumes = { MediaType.APPLICATION_JSON_VALUE },
+            produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<Contact> save(@PathVariable(name = "userId") Long userId, @PathVariable(name = "contactId") Long contactId,
+            @RequestBody Contact contact) {
+        Optional<User> usr = userRepository.findById(userId);
+        if (usr.isPresent()) {
+            List<Contact> contacts = usr.get().getContacts().stream().filter(c -> c.getId() == contactId).collect(Collectors.toList());
+            if (!contacts.isEmpty()) {
+                Contact contactFromDb = contacts.get(0);
+
+            }
+        }
         return null;
     }
 
     @GetMapping(path = "/usr/{userId}/receipt", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<List<Contact>> findContacsByUserId(@PathVariable("userId") Long userId,
             @RequestParam(required = false, name = "startLetter") String startsWith) {
-
-        return null;
+        Optional<User> usr = userRepository.findById(userId);
+        if (usr.isPresent()) {
+            List<Contact> contacts = null;
+            if (!StringUtils.isEmpty(startsWith)) {
+                contacts = usr.get().getContacts().stream().filter(c -> c.getName().startsWith(startsWith)).collect(Collectors.toList());
+            } else {
+                contacts = usr.get().getContacts();
+            }
+            if (!contacts.isEmpty()) {
+                return ResponseEntity.ok(contacts);
+            }
+        }
+        return ResponseEntity.notFound().build();
 
     }
+
+    @GetMapping(path = "/usr/{userId}/receipt/{contactId}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<Contact> getContactDetail(@PathVariable(name = "userId") Long userId,
+            @PathVariable(name = "contactId") Long contactId) {
+        Optional<User> usr = userRepository.findById(userId);
+        if (usr.isPresent()) {
+            List<Contact> contacts = usr.get().getContacts().stream().filter(c -> c.getId() == contactId).collect(Collectors.toList());
+            if (!contacts.isEmpty()) {
+                return ResponseEntity.ok(contacts.get(0));
+            }
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
 }

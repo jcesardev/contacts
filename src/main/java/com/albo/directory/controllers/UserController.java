@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,42 +28,42 @@ import io.swagger.annotations.Api;
 @RequestMapping("/usr")
 @Api(value = "/usr", produces = "application/json", tags = {"User"}, description= "User management")
 public class UserController {
-	
+    
 	@Autowired
 	private UserRepository userRepository;
-
+	
+	@PostMapping(consumes= {MediaType.APPLICATION_JSON_VALUE}, 
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public User create(@Valid @RequestBody User user) {
+        return userRepository.save(user);
+    }
+	
+	@PutMapping(path = "/{userId}", 
+            consumes= {MediaType.APPLICATION_JSON_VALUE}, 
+            produces = {MediaType.APPLICATION_JSON_VALUE} )
+    public ResponseEntity<User> update(@PathVariable(name="userId")Long userId, @RequestBody User user) {
+        Optional<User> userFromDb = userRepository.findById(userId);
+        if(userFromDb.isPresent()) {
+            user.setId(userFromDb.get().getId());
+            userRepository.saveAndFlush(user);
+            return ResponseEntity.ok(user);
+        }
+        return ResponseEntity.notFound().build();
+    }
+	
 	@GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
 	public ResponseEntity<List<User>> findAll(@RequestParam(required = false, name = "startLetter") String startsWith) {
 	    List<User> users = null;
-	    if(startsWith != null) {
+	    if(!StringUtils.isEmpty(startsWith)) {
 	        users = userRepository.findByNameStartingWithIgnoreCase(startsWith);	        
-	    }else {
-	        users = userRepository.findAll();
-	    }	    
+	    }
+	    users = userRepository.findAll();
+	    
 	    if(!users.isEmpty()) {
 	        return ResponseEntity.ok(users);
 	    }
 	    return ResponseEntity.notFound().build();
-	}
-	
-	@PostMapping(consumes= {MediaType.APPLICATION_JSON_VALUE}, 
-	        produces = {MediaType.APPLICATION_JSON_VALUE})
-	public User create(@Valid @RequestBody User user) {
-		return userRepository.save(user);
-	}
-	
-	@PutMapping(path = "/{userId}", 
-	        consumes= {MediaType.APPLICATION_JSON_VALUE}, 
-	        produces = {MediaType.APPLICATION_JSON_VALUE} )
-	public ResponseEntity<User> update(@PathVariable(name="userId")Long userId, @RequestBody User user) {
-	    Optional<User> userFromDb = userRepository.findById(userId);
-	    if(userFromDb.isPresent()) {
-	        user.setId(userFromDb.get().getId());
-	        userRepository.saveAndFlush(user);
-	        return ResponseEntity.ok(user);
-	    }
-	    return ResponseEntity.notFound().build();
-	}
+	}	
 	
 	@GetMapping(path = "/{userId}", 
 	        produces = {MediaType.APPLICATION_JSON_VALUE})

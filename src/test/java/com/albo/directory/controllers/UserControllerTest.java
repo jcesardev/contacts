@@ -45,14 +45,12 @@ public class UserControllerTest {
     }
     
     @Test
-    public void canRetrieveWhenExists() throws Exception {
+    public void whenCanRetrieveUsers_ThenOk() throws Exception {
         User usr = new User();        
         List<User> users = new ArrayList<>();
-        users.add(usr);
-        
+        users.add(usr);        
         // given
-        given(userRepository.findAll()).willReturn(users);
-        
+        given(userRepository.findAll()).willReturn(users);        
         // when
         MockHttpServletResponse response = mvc.perform(
                 get("/usr").accept(MediaType.APPLICATION_JSON))
@@ -60,6 +58,19 @@ public class UserControllerTest {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString()).isEqualTo(jsonUser.write(users).getJson());
+    }
+    
+    @Test
+    public void whenNotFoundUsers_ThenNotFound() throws Exception {                
+        List<User> users = new ArrayList<>();                
+        // given
+        given(userRepository.findAll()).willReturn(users);        
+        // when
+        MockHttpServletResponse response = mvc.perform(
+                get("/usr").accept(MediaType.APPLICATION_JSON))
+                .andReturn().getResponse();
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
     }
 
 }

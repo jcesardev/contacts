@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 import com.albo.directory.models.User;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long>{    
-    List<User> findByNameStartingWithIgnoreCase(String name);
+public interface UserRepository extends JpaRepository<User, Long>{
+    
+    List<User> findByNameStartingWithIgnoreCase(String name);   
+    
+    
 }
