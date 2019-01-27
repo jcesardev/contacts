@@ -16,6 +16,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "USERS_TBL")
 public class User {
@@ -28,6 +30,7 @@ public class User {
     @Column(nullable = false)
     private String name;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
                 CascadeType.PERSIST,
@@ -38,6 +41,27 @@ public class User {
             inverseJoinColumns = { @JoinColumn(name = "contact_id") })
     private List<Contact> contacts = new ArrayList<>();
 
+    
+    /*
+     * Constructor of the class.
+     */
+    public User() {
+        super();    
+    }
+
+    /**
+     * Constructor of the class.
+     *
+     * @param id
+     * @param name
+     * @param contacts
+     */
+    public User(Long id, @NotBlank(message = "Name aren't blank.") String name, List<Contact> contacts) {
+        super();
+        this.id = id;
+        this.name = name;
+        this.contacts = contacts;
+    }
 
     /**
      * @return the id
@@ -46,14 +70,12 @@ public class User {
         return id;
     }
 
-
     /**
      * @param id the id to set
      */
     public void setId(Long id) {
         this.id = id;
     }
-
 
     /**
      * @return the name
@@ -62,7 +84,6 @@ public class User {
         return name;
     }
 
-
     /**
      * @param name the name to set
      */
@@ -70,14 +91,12 @@ public class User {
         this.name = name;
     }
 
-
     /**
      * @return the contacts
      */
     public List<Contact> getContacts() {
         return contacts;
     }
-
 
     /**
      * @param contacts the contacts to set

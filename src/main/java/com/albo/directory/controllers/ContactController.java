@@ -54,16 +54,14 @@ public class ContactController {
     @PutMapping(path = "/usr/{userId}/receipt/{contactId}", consumes = { MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<Contact> save(@PathVariable(name = "userId") Long userId, @PathVariable(name = "contactId") Long contactId,
-            @RequestBody Contact contact) {
-        Optional<User> usr = userRepository.findById(userId);
-        if (usr.isPresent()) {
-            List<Contact> contacts = usr.get().getContacts().stream().filter(c -> c.getId() == contactId).collect(Collectors.toList());
-            if (!contacts.isEmpty()) {
-                Contact contactFromDb = contacts.get(0);
-
-            }
+            @Valid @RequestBody Contact contact) {
+        Contact contactFromDb = findContactById(userId, contactId);
+        if (contactFromDb != null) {
+            contact.setId(contactFromDb.getId());
+            contactRepopsitory.saveAndFlush(contact);
+            return ResponseEntity.ok(contact);
         }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping(path = "/usr/{userId}/receipt", produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -82,21 +80,31 @@ public class ContactController {
             }
         }
         return ResponseEntity.notFound().build();
-
     }
 
     @GetMapping(path = "/usr/{userId}/receipt/{contactId}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<Contact> getContactDetail(@PathVariable(name = "userId") Long userId,
             @PathVariable(name = "contactId") Long contactId) {
+        Contact contact = findContactById(userId, contactId);
+        if(contact != null) 
+            return ResponseEntity.ok(contact);
+        return ResponseEntity.notFound().build();
+    }
+
+    /**
+     * Find contact by user id and contact id.
+     * @param userId
+     * @param contactId
+     * @return
+     */
+    private Contact findContactById(Long userId, Long contactId){
         Optional<User> usr = userRepository.findById(userId);
         if (usr.isPresent()) {
             List<Contact> contacts = usr.get().getContacts().stream().filter(c -> c.getId() == contactId).collect(Collectors.toList());
             if (!contacts.isEmpty()) {
-                return ResponseEntity.ok(contacts.get(0));
+                return contacts.get(0);
             }
         }
-
-        return ResponseEntity.notFound().build();
+        return null;
     }
-
 }
