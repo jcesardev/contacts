@@ -10,6 +10,8 @@ import com.albo.directory.models.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>{
     
-    List<User> findByNameStartingWithIgnoreCase(String name);   
+    List<User> findByNameStartingWithIgnoreCase(String name);
+    
+    List<User> findByContacts_Id(Long contactId);
     
 }

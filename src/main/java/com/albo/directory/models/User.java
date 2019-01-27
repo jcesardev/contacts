@@ -1,7 +1,8 @@
 package com.albo.directory.models;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -39,7 +40,7 @@ public class User {
     @JoinTable(name = "user_contact",
             joinColumns = { @JoinColumn(name = "user_id") },
             inverseJoinColumns = { @JoinColumn(name = "contact_id") })
-    private List<Contact> contacts = new ArrayList<>();
+    private Set<Contact> contacts = new HashSet<Contact>();
 
     
     /*
@@ -56,7 +57,7 @@ public class User {
      * @param name
      * @param contacts
      */
-    public User(Long id, @NotBlank(message = "Name aren't blank.") String name, List<Contact> contacts) {
+    public User(Long id, @NotBlank(message = "Name aren't blank.") String name, Set<Contact> contacts) {
         super();
         this.id = id;
         this.name = name;
@@ -94,14 +95,14 @@ public class User {
     /**
      * @return the contacts
      */
-    public List<Contact> getContacts() {
+    public Set<Contact> getContacts() {
         return contacts;
     }
 
     /**
      * @param contacts the contacts to set
      */
-    public void setContacts(List<Contact> contacts) {
+    public void setContacts(Set<Contact> contacts) {
         this.contacts = contacts;
     }
 

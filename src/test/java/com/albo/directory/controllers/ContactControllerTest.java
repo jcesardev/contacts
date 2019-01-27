@@ -7,8 +7,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +45,7 @@ public class ContactControllerTest {
     @InjectMocks
     private ContactController contactController;
     
-    private JacksonTester<List<Contact>> jsonContacts;
+    private JacksonTester<Set<Contact>> jsonContacts;
     
     private JacksonTester<Contact> jsonContact;
    
@@ -56,7 +58,7 @@ public class ContactControllerTest {
     @Test
     public void whenSaveContact_ThenOk() throws Exception {
         Contact contact = new Contact(2L, "New Contact", 525568686868L);
-        User usr = new User(1L, "User test", new ArrayList<Contact>());
+        User usr = new User(1L, "User test", new HashSet<Contact>());
         Optional<User> userFromDb = Optional.of(usr);        
         given(userRepository.findById(1L)).willReturn(userFromDb);    
         given(contactRepository.findByPhoneNumber(525568686868L)).willReturn(contact);
@@ -72,7 +74,7 @@ public class ContactControllerTest {
     @Test
     public void whenCanRetrieveUserAndCanRetrieveContact_ThenOk() throws Exception {
         Contact contact = new Contact(2L, "New Contact", 525568686868L);
-        List<Contact> contacts = new ArrayList<>();
+        Set<Contact> contacts = new HashSet<Contact>();
         contacts.add(contact);
         User usr = new User(1L, "User test", contacts);
         Optional<User> userFromDb = Optional.of(usr);        
@@ -88,7 +90,7 @@ public class ContactControllerTest {
     @Test
     public void whenCanRetrieveUserAndCanRetrieveContactById_ThenOk() throws Exception {
         Contact contact = new Contact(2L, "New Contact", 525568686868L);
-        List<Contact> contacts = new ArrayList<>();
+        Set<Contact> contacts = new HashSet<Contact>();
         contacts.add(contact);
         User usr = new User(1L, "User test", contacts);
         Optional<User> userFromDb = Optional.of(usr);        

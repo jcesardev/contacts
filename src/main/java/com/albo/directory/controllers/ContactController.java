@@ -2,6 +2,7 @@ package com.albo.directory.controllers;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,7 +55,7 @@ public class ContactController {
 
     @PutMapping(path = "/usr/{userId}/receipt/{contactId}", consumes = { MediaType.APPLICATION_JSON_VALUE },
             produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<Contact> save(@PathVariable(name = "userId") Long userId, @PathVariable(name = "contactId") Long contactId,
+    public ResponseEntity<Contact> update(@PathVariable(name = "userId") Long userId, @PathVariable(name = "contactId") Long contactId,
             @Valid @RequestBody Contact contact) {
         Contact contactFromDb = findContactById(userId, contactId);
         if (contactFromDb != null) {
@@ -65,13 +67,13 @@ public class ContactController {
     }
 
     @GetMapping(path = "/usr/{userId}/receipt", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<List<Contact>> findContacsByUserId(@PathVariable("userId") Long userId,
+    public ResponseEntity<Set<Contact>> findContacsByUserId(@PathVariable("userId") Long userId,
             @RequestParam(required = false, name = "startLetter") String startsWith) {
         Optional<User> usr = userRepository.findById(userId);
         if (usr.isPresent()) {
-            List<Contact> contacts = null;
+            Set<Contact> contacts = null;
             if (!StringUtils.isEmpty(startsWith)) {
-                contacts = usr.get().getContacts().stream().filter(c -> c.getName().startsWith(startsWith)).collect(Collectors.toList());
+                contacts = usr.get().getContacts().stream().filter(c -> c.getName().startsWith(startsWith)).collect(Collectors.toSet());
             } else {
                 contacts = usr.get().getContacts();
             }
@@ -90,7 +92,27 @@ public class ContactController {
             return ResponseEntity.ok(contact);
         return ResponseEntity.notFound().build();
     }
-
+    
+    
+    @DeleteMapping(path = "/usr/{userId}/receipt/{contactId}")
+    public ResponseEntity<List<Contact>> delete(@PathVariable("userId") Long userId,
+            @PathVariable("contactId") Long contactId) {
+        Optional<User> usr = userRepository.findById(userId);
+        if(usr.isPresent()) {
+            Optional<Contact> contact = contactRepopsitory.findById(contactId);
+            if(contact.isPresent()) {
+                usr.get().getContacts().remove(contact.get());
+                userRepository.saveAndFlush(usr.get());              
+                List<User> usrs = userRepository.findByContacts_Id(contactId);
+                if(usrs.size() == 0) {
+                    contactRepopsitory.delete(contact.get());
+                }                
+                return ResponseEntity.noContent().build();
+            }
+        }        
+        return ResponseEntity.notFound().build();
+    }
+    
     /**
      * Find contact by user id and contact id.
      * @param userId
