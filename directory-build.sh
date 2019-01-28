@@ -11,7 +11,7 @@ mvn clean
 echo ""
 echo ""
 echo " - RESOLVE DEPENDENCIES"
-mvn dependency resolve
+mvn dependency:resolve
 echo ""
 echo ""
 echo " - RUN UNIT TESTS AND PACKAGE"
